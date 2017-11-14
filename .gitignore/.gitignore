@@ -1,0 +1,100 @@
+#define _CRT_SECURE_NO_DEPRECATE
+#include <stdio.h>
+#include <stdlib.h>
+char wordsheet[100][100];
+int m, n, countletter[100][100],start=0;/*countletter用于储存该位置是第几个字母*/
+struct rowstart {/*rowstart用于记录行起始点*/
+	int x0;
+	int y0;
+};
+struct colstart {/*colstart用于记录列起始点*/
+	int x0;
+	int y0;
+};
+struct rowstart row[100];
+struct colstart col[100];
+int rowcount = 0, colcount = 0;
+void getStart(int a, int b)/*获取起始点*/
+{
+	if ((a == 0 || wordsheet[a - 1][b] == '*')&&(wordsheet[a][b]!='*')){
+		col[colcount].x0 = a;
+		col[colcount].y0 = b;
+		colcount++;
+	}
+	if ((b == 0 || wordsheet[a][b - 1] == '*')&&(wordsheet[a][b]!='*')){
+		row[rowcount].x0 = a;
+		row[rowcount].y0 = b;
+		rowcount++;
+	}
+}
+void initialize(int m, int n)
+{
+	for (int i=0;i<m;i++)
+		for (int j = 0; j < n; j++) {
+			if (j == n-1 ){
+				wordsheet[i][j] = getchar();
+				getchar();
+			}
+			else
+				wordsheet[i][j] = getchar();
+			if (wordsheet[i][j] != '*') {/*countletter的记录比较繁琐，要考虑是否为字母，是否为0，0处，是否为0列，并分开讨论*/
+				if (i == 0 && j == 0)
+					countletter[i][j] = start + 1;
+				else {
+					if (j == 0)
+						countletter[i][j] = countletter[i - 1][n - 1] + 1;
+					else
+						countletter[i][j] = countletter[i][j - 1] + 1;
+				}
+			}
+			else {
+				if (j == 0)
+					countletter[i][j] = countletter[i - 1][n - 1];
+				else
+					countletter[i][j] = countletter[i][j - 1];
+			}
+		}
+}
+void prinrow(int a, int b)
+{
+	int i = b;
+	while (wordsheet[a][i] != '*'&&i!=n+1) {
+		if (wordsheet[a][i + 1] == '*'||i==n)
+			printf("%c\n", wordsheet[a][i]);
+		else
+			printf("%c", wordsheet[a][i]);
+		i++;
+	}
+}
+void princol(int a, int b)
+{
+	int i = a;
+	while (wordsheet[i][b] != '*'&&i!=m+1) {
+		if (wordsheet[i + 1][b] == '*'||i==m)
+			printf("%c\n", wordsheet[i][b]);
+		else
+			printf("%c", wordsheet[i][b]);
+		i++;
+	}
+}
+int main()
+{
+	scanf("%d %d", &m, &n);
+	getchar();
+	initialize(m, n);
+	for (int i = 0; i < m; i++)
+		for (int j = 0; j < n; j++)
+			getStart(i, j);
+	printf("Across\n");
+	for (int i = 0; i < rowcount; i++) {
+		printf("%3d.", countletter[row[i].x0][row[i].y0]);
+		prinrow(row[i].x0, row[i].y0);
+	}
+	printf("Down\n");
+	for (int i = 0; i < colcount; i++) {
+		printf("%3d.", countletter[col[i].x0][col[i].y0]);
+		princol(col[i].x0, col[i].y0);
+	}
+	system("pause");
+	return 0;
+}
